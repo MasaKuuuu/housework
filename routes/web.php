@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HouseworkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +21,16 @@ Route::get('/', function () {
 });
 
 Route::get('/test', [TestController::class, 'index']);
+
+// ホーム画面
+Route::get('/home', [HomeController::class, 'index']);
+
+// 新規作成画面
+Route::get('/create', [HouseworkController::class, 'create']);
+
+// 登録処理
+Route::post('/insert', [HouseworkController::class, 'insert']);
+
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
