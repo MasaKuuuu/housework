@@ -1,74 +1,75 @@
-# For more information: https://laravel.com/docs/sail
-version: '3'
+version: '2'
 services:
-    laravel.test:
-        build:
-            context: ./vendor/laravel/sail/runtimes/8.0
-            dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
-        image: sail-8.0/app
-        ports:
-            - '${APP_PORT:-80}:80'
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - sail
-        depends_on:
-            - mysql
-            - redis
-            # - selenium
-    # selenium:
-    #     image: 'selenium/standalone-chrome'
-    #     volumes:
-    #         - '/dev/shm:/dev/shm'
-    #     networks:
-    #         - sail
-    #     depends_on:
-    #         - laravel.test
-    mysql:
-        image: 'mysql:8.0'
-        ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-        volumes:
-            - 'sailmysql:/var/lib/mysql'
-        networks:
-            - sail
-    redis:
-        image: 'redis:alpine'
-        ports:
-            - '${FORWARD_REDIS_PORT:-6379}:6379'
-        volumes:
-            - 'sailredis:/data'
-        networks:
-            - sail
-    # memcached:
-    #     image: 'memcached:alpine'
-    #     ports:
-    #         - '11211:11211'
-    #     networks:
-    #         - sail
-    mailhog:
-        image: 'mailhog/mailhog:latest'
-        ports:
-            - 1025:1025
-            - 8025:8025
-        networks:
-            - sail
+  app:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    image: vessel/app
+    ports:
+     - "${APP_PORT}:80"
+    environment:
+      CONTAINER_ENV: "${APP_ENV}"
+      XDEBUG_HOST: "${XDEBUG_HOST}"
+      WWWUSER: "${WWWUSER}"
+    volumes:
+     - .:/var/www/html
+    networks:
+     - vessel
+  node:
+    build:
+      context: ./docker/node
+      dockerfile: Dockerfile
+      args:
+        uid: "${WWWUSER}"
+    image: vessel/node
+    user: node
+    volumes:
+     - .:/var/www/html
+    networks:
+     - vessel
+  # mysql:
+  #   image: mysql:5.7
+  #   ports:
+  #    - "${MYSQL_PORT}:3306"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+  #     MYSQL_DATABASE: "${DB_DATABASE}"
+  #     MYSQL_USER: "${DB_USERNAME}"
+  #     MYSQL_PASSWORD: "${DB_PASSWORD}"
+  #     MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+  #   volumes:
+  #    - vesselmysql:/var/lib/mysql
+  #    # - ./docker/mysql/conf.d:/etc/mysql/conf.d
+  #    # - ./docker/mysql/logs:/var/log/mysql
+  #   networks:
+  #    - vessel
+  pgsql:
+    image: postgres:10.0
+    ports:
+     - "${PGSQL_PORT}:5432"
+    environment:
+      POSTGRES_USER: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_DATABASE}"
+    volumes:
+     - vesselpgsql:/var/lib/postgresql/data
+     # - ./docker/mysql/conf.d:/etc/mysql/conf.d
+     # - ./docker/mysql/logs:/var/log/mysql
+    networks:
+     - vessel
+  redis:
+    image: redis:alpine
+    volumes:
+     - vesselredis:/data
+    networks:
+     - vessel
 networks:
-    sail:
-        driver: bridge
+  vessel:
+    driver: "bridge"
 volumes:
-    sailmysql:
-        driver: local
-    sailredis:
-        driver: local
+  # vesselmysql:
+  #   driver: "local"
+  vesselpgsql:
+    driver: "local"
+  vesselredis:
+    driver: "local"
