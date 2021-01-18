@@ -6,12 +6,17 @@
         ホーム画面
     </h1>
     <div>
+        <h2>当日タスク</h2>
         <ul>
-        @foreach ($tasks as $task)
-        <li>
-            {{ $task->task_name }}:{{ $task->term }}:{{ $task->point }}
-        </li>
-        @endforeach
+            @each('components.taskcard',$todayTasks,'task')
+        </ul>
+        <h2>過ぎているタスク</h2>
+        <ul>
+            @each('components.taskcard',$passTasks,'task')
+        </ul>
+        <h2>完了タスク</h2>
+        <ul>
+            @each('components.taskcard',$fixTasks,'task')
         </ul>
     </div>
     <a href="create">タスク追加</a>

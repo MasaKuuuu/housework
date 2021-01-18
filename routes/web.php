@@ -31,6 +31,8 @@ Route::get('/create', [HouseworkController::class, 'create']);
 // 登録処理
 Route::post('/insert', [HouseworkController::class, 'insert']);
 
+// タスク完了処理
+Route::middleware(['auth:sanctum', 'verified'])->get('/fixTask', [HouseworkController::class, 'insertTaskExectionDate']);
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
